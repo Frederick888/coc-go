@@ -649,6 +649,11 @@
         "command": "go.gopls.tidy"
       },
       {
+        "title": "Run go.gopls.gc_details LSP command",
+        "category": "Go",
+        "command": "go.gopls.gc_details"
+      },
+      {
         "title": "Generate interface stubs",
         "category": "Go",
         "command": "go.impl.cursor"
