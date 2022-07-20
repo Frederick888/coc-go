@@ -4,13 +4,14 @@ import os from 'os'
 import { commandExists, goBinPath, installGoBin } from './utils/tools'
 import { checkGopls, installGomodifytags, installGoplay, installGopls, installGotests, installImpl, installTools, version } from './commands'
 import { addTags, clearTags, removeTags } from './utils/modify-tags'
-import { getConfig, setStoragePath } from './utils/config'
+import { getConfig, getLanguageClientDisabledFeatures, setStoragePath } from './utils/config'
 import { activeTextDocument } from './editor'
 import { GOPLS } from './binaries'
 import { generateTestsAll, generateTestsExported, generateTestsFunction, toogleTests } from './utils/tests'
 import { openPlayground } from './utils/playground'
 import { generateImplStubs } from './utils/impl'
 import { goplsGcDetails, goplsTidy } from './utils/lspcommands'
+import * as goplsInlayHintsFeature from './inlayHints'
 
 const restartConfigs = [
   'go.goplsArgs',
@@ -78,12 +79,9 @@ async function registerGopls(context: ExtensionContext): Promise<void> {
 
   // https://github.com/neoclide/coc.nvim/blob/master/src/language-client/client.ts#L684
   const clientOptions: LanguageClientOptions = {
-    documentSelector: ['go', 'gomod'],
+    documentSelector: ['go', 'gomod', 'gowork'],
     initializationOptions: () => getConfig().goplsOptions,
-    disableWorkspaceFolders: config.disable.workspaceFolders,
-    disableDiagnostics: config.disable.diagnostics,
-    disableCompletion: config.disable.completion,
-    // TODO disableSnippetCompletion: config.disable.snippetCompletion,
+    disabledFeatures: getLanguageClientDisabledFeatures(),
   }
 
   const client = new LanguageClient('go', 'gopls', server, clientOptions)
@@ -108,6 +106,8 @@ async function registerGopls(context: ExtensionContext): Promise<void> {
       () => installGopls(client)
     )
   )
+
+  goplsInlayHintsFeature.register(context, client)
 }
 
 async function goplsPath(goplsPath: string): Promise<string | null> {

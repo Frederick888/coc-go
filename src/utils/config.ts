@@ -25,6 +25,7 @@ export interface GoConfig {
   tests: GoTestsConfig
   checkForUpdates: "disabled" | "inform" | "ask" | "install"
   disable: DisableConfig
+  disabledFeatures?: string[]
 }
 
 export interface DisableConfig {
@@ -134,6 +135,11 @@ export interface GoplsOptions {
    * Default: false
    */
   gofumpt: boolean
+
+  /**
+   * Default: {}
+   */
+  hints: { string: boolean }
 
   /**
    * Default: "FullDocumentation"
@@ -254,3 +260,10 @@ export async function setState<T>(key: string, value: T) {
   await setStateData(d)
 }
 
+export function getLanguageClientDisabledFeatures() {
+  const r: string[] = []
+  if (getConfig().disable.completion) r.push('completion')
+  if (getConfig().disable.workspaceFolders) r.push('workspaceFolders')
+  if (getConfig().disable.diagnostics) r.push('diagnostics')
+  return r
+}
